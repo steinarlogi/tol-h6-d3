@@ -1,0 +1,70 @@
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+
+uniform mat4 rotation;
+uniform mat3 normalMatrix;
+
+varying vec3 N, L, E;
+
+uniform vec4 lightPosition;
+
+void main() 
+{
+    vec3 pos = (rotation * vPosition).xyz;
+
+    L = normalize(lightPosition.xyz - pos);
+    E = -normalize(pos);
+    N = normalize(normalMatrix*vNormal.xyz);
+
+    gl_Position = rotation * vPosition;
+} 
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec3 N, L, E;
+uniform float shininess;
+
+uniform vec4 specularColor;
+uniform vec4 ambientColor;
+uniform vec4 diffuseColor;
+
+void
+main()
+{
+    vec3 H = normalize(L + E);
+    vec4 ambient = ambientColor;
+
+    float cos_th = max(dot(normalize(L), normalize(N)), 0.0);
+    vec4 diffuse = cos_th * diffuseColor;
+
+    float cos_phi = pow(max(dot(normalize(N), normalize(H)), 0.0), shininess);
+    vec4 specular = cos_phi * specularColor;
+    
+    if(dot(L, N) < 0.0) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    vec4 color = diffuse + ambient + specular;
+    color.a = 1.0;
+
+    gl_FragColor = color;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="PhongCube.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512"" height="512">
+   
+<br/>
+
+</body>
+</html>
